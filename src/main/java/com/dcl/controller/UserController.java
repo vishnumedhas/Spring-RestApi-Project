@@ -5,6 +5,8 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.dcl.exception.AppException;
 import com.dcl.reqdto.LoginRequest;
 import com.dcl.reqdto.RegisterRequest;
 import com.dcl.responseDto.UserDto;
@@ -27,7 +30,10 @@ public class UserController {
 	private UserService uservice;
 	
 	@PostMapping("/register")
-	public ResponseEntity<?> register(@RequestBody RegisterRequest request){
+	public ResponseEntity<?> register( @Validated @RequestBody RegisterRequest request,BindingResult result){
+		if(result.hasErrors()) {
+			throw new AppException(result.getFieldError().getDefaultMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 		
 		UserDto dto=uservice.register(request);
 		return  ResponseEntity.ok(new ApiResponse<>("Data added successfully",dto,HttpStatus.OK));

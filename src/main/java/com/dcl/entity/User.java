@@ -4,11 +4,15 @@ import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.PreUpdate;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -34,10 +38,21 @@ public class User {
 	@Column(updatable = false)
 	private LocalDateTime createdAt;
 	
-	private LocalDateTime updaatedAt;
+	private LocalDateTime updatedAt;
 	
 	@PreUpdate
 	public void setUpdatedAt() {
-		this.updaatedAt=LocalDateTime.now();
+		this.updatedAt=LocalDateTime.now();
 	}
+	
+	// cascade = CascadeType.ALL [Operations performed on the User can automatically be propagated to its Profile]
+	// Cascade includes operations such as: PERSIST MERGE REMOVE REFRESH DETACH
+	// ex: save user save profile delete user delete profile update user update profile
+	//If the Profile is removed from the User's relationship, JPA will delete that orphan Profile from the database.
+	@OneToOne(mappedBy = "user",cascade = CascadeType.ALL ,orphanRemoval = true)
+	private Profile profile;
+	
+	@ManyToOne
+	@JoinColumn(name="role_id")
+	private Role role;
 }
